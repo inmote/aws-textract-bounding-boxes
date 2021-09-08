@@ -3,14 +3,14 @@ using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using static iText.Kernel.Colors.ColorConstants;
 using iText.Kernel.Pdf.Canvas;
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 using iText.Kernel.Colors;
-using System.Threading.Tasks;
 using Amazon.Textract.Model;
 using Amazon.Textract;
+using Newtonsoft.Json;
 
 namespace TextractGeometry
 {
@@ -43,9 +43,21 @@ namespace TextractGeometry
             } while (key.KeyChar != 'q' && key.KeyChar != 'Q');
         }
 
+        static void OutputJson(String outputPdfFileName, List<Block> blocks)
+        {
+            String jsonFileName = System.IO.Path.GetDirectoryName(outputPdfFileName) + "\\" + System.IO.Path.GetFileNameWithoutExtension(outputPdfFileName) + ".json";
+
+            String output = JsonConvert.SerializeObject(blocks);
+
+            StreamWriter sw = new StreamWriter(jsonFileName);
+            sw.WriteLine(output);
+            sw.Close();
+        }
+
         static void Main(string[] args)
         {
-            xmlsettings.ShowVersion();
+            String assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Console.WriteLine("Textract Geeometry tool v" + assemblyVersion);
 
             if (args.Length != 2)
             {
@@ -60,17 +72,13 @@ namespace TextractGeometry
                     Console.WriteLine("Error: " + inputPdfFileName + " does not exists!");
                     return;
                 }
-                Settings settings = xmlsettings.ReadSettings();
-                if(!settings._SettingsOK)
-                {
-                    Console.WriteLine("Error: Settings not found!");
-                    return;
-                }
+                Settings settings = new Settings();
 
                 String key = aws_api.UploadFile(settings._AccessKeyId, settings._SecretAccessKey, settings._BucketName, inputPdfFileName);
                 List<Block> blocks = aws_api.AnalysePdf(settings._AccessKeyId, settings._SecretAccessKey, settings._BucketName, key);
 
                 String outputPdfFileName = args[1];
+                OutputJson(outputPdfFileName, blocks);
 
                 BoundingBox boundingBoxPage = null;
                 List<Box> boundingBoxLines = new List<Box>();

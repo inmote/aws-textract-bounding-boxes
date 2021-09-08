@@ -12,6 +12,11 @@ The tool is merely intented to visualize the JSON output from the Textract
 command line interface such that invoice processing applications can be 
 created more quickly.
 
+## Support
+
+This project is maintained by Inmote. For support you can email to info@inmote.com
+and refer to the contact details on https://www.inmote.nl.
+
 ## Features
 
 - Windows .NET 4.7.2 Framework console application written in C#.
